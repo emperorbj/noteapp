@@ -1,0 +1,27 @@
+@import url('https://fonts.googleapis.com/css2?family=Albert+Sans:ital,wght@0,100..900;1,100..900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+@layer base{
+  html {
+    font-family: "Albert Sans", sans-serif;
+  }
+
+  body{
+    background-color: #fdfeff;
+    overflow-x: hidden;
+  }
+}
+
+@layer components{
+  .input-box{
+    @apply w-full text-sm bg-transparent border-[1.5px] px-5 py-3 rounded mb-4 outline-none;
+  }
+
+  .primary-btn{
+    @apply w-full text-xl bg-primary text-white p-2 rounded my-2 hover:bg-blue-400;
+  }
+}
