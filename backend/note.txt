@@ -2,3 +2,5 @@
 data2023
 
 data2023//30
+
+random token generator : openssl rand -base64 32
