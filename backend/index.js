@@ -26,7 +26,7 @@ app.get("/", (req, res) => {
     res.json({ data: "hello" });
 });
 
-// Creating an account
+// Creating an account end point
 app.post("/account", async (req, res) => {
     const { fullName, email, password } = req.body;
 
@@ -74,6 +74,7 @@ app.post("/account", async (req, res) => {
     
 });
 
+// login into account end point
 app.post("/login", async (req, res) => {
     const { email, password } = req.body;
 
