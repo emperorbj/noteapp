@@ -1,17 +1,19 @@
-require("dotenv").config()
 
-const config = require("./config.json")
-const mongoose = require("mongoose")
+require("dotenv").config();
 
+const config = require("./config.json");
+const mongoose = require("mongoose");
+
+//mongoose.connect(config.connectionString, { useNewUrlParser: true, useUnifiedTopology: true });
 mongoose.connect(config.connectionString)
-const User = require("./models/user.model")
+const User = require("./models/user.model");
 
 const express = require("express");
 const cors = require("cors");
+const jwt = require("jsonwebtoken");
+const { authenticateToken } = require("./utilities");
 const app = express();
 
-const jwt = require("jsonwebtoken");
-const { authenticate } = require("./utilities");
 app.use(express.json());
 
 app.use(
@@ -20,46 +22,83 @@ app.use(
     })
 );
 
-app.get("/", (req,res) => {
-    res.json({ data: "hello"})
-})
+app.get("/", (req, res) => {
+    res.json({ data: "hello" });
+});
 
-// creating and account
-app.post("/create-account",async (req,res) => {
+// Creating an account
+app.post("/account", async (req, res) => {
     const { fullName, email, password } = req.body;
 
-    if(!fullName) {
+    if (!fullName) {
         return res.status(400).json({ error: true, message: "Full name is required" });
     }
 
-    if(!email) {
-        return res.status(400).json({ error: true, message: "email is required" });
+    if (!email) {
+        return res.status(400).json({ error: true, message: "Email is required" });
     }
 
-    if(!password) {
-        return res.status(400).json({ error: true, message: "password is required" });
+    if (!password) {
+        return res.status(400).json({ error: true, message: "Password is required" });
     }
 
-    if(!fullName) {
-        return res.status(400).json({ error: true, message: "Full name is required" });
-    }
-    
-    const isUser = await user.findOne({ email: email});
 
-    if(isUser) {
+
+
+    const isUser = await User.findOne({ email: email });
+
+    if (isUser) {
         return res.json({
             error: true,
             message: "User already exists"
-        })
+        });
     }
 
-    const user = new user({
+    const newUser = new User({
         fullName,
         email,
         password
     });
 
-    await user.save();
+    await newUser.save();
+    const accessToken = jwt.sign({ user: newUser }, process.env.ACCESS_TOKEN_SECRET, {
+        expiresIn: "3600m",
+    });
+    return res.json({
+        error: false,
+        user: newUser,
+        accessToken,
+        message: "Registration successful"
+    });
+
+    
+});
+
+app.post("/login", async (req, res) => {
+    const { email, password } = req.body;
+
+    if (!email) {
+        return res.status(400).json({ error: true, message: "Email is required" });
+    }
+
+    if (!password) {
+        return res.status(400).json({ error: true, message: "Password is required" });
+    }
+
+    const UserInfo = await User.findOne({ email: email });
+
+    if (!UserInfo) {
+        return res.json({
+            error: true,
+            message: "User does not exists"
+        });
+    }
 })
-app.listen(8000)
+
+
+
+app.listen(8000, () => {
+    console.log('Server is running on port 8000');
+});
+
 module.exports = app;
