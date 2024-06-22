@@ -120,7 +120,7 @@ app.post("/login", async (req, res) => {
 })
 
 
-// get user
+// get user profile
 app.get("/get-user", authenticateToken, async(req,res) => {
     const { user } = req.user;
     const isUser = await User.findOne({_id: user._id});
