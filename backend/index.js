@@ -229,7 +229,7 @@ app.put("/edit-note/:noteId", authenticateToken, async (req,res) =>{
 
 // Get all notes
 
-app.put("/get-all-notes/", authenticateToken, async (req,res) =>{
+app.get("/get-all-notes/", authenticateToken, async (req,res) =>{
     const { user } = req.user;
 
     try{

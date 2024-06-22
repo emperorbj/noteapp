@@ -2,8 +2,11 @@ import Navbar from "../../components/Navbar"
 import NoteCard from "../../components/cards/NoteCard"
 import { MdAdd } from "react-icons/md"
 import AddEditNote from "./AddEditNote"
-import { useState} from "react"
+import { useEffect, useState} from "react"
 import  Modal  from "react-modal"
+import { useNavigate } from "react-router-dom"
+import axiosInstance from "../../utils/axioInstances"
+import moment from "moment";
 
 
 const Home = () => {
@@ -14,21 +17,70 @@ const Home = () => {
         data: null,
     });
 
+    const [allNotes, setAllNotes] = useState([])
+
+    const [userInfo, setUserInfo] = useState(null);
+
+    const navigate = useNavigate();
+
+    // get user info
+
+    const getUserInfo = async() => {
+        try{
+            const response = await axiosInstance.get("get-user");
+            if(response.data && response.data.user) {
+                setUserInfo(response.data.user);
+            }
+        }
+        catch(error){
+            if(error.response.status === 401) {
+                localStorage.clear();
+                navigate("/login")
+            }
+        }
+    }
+
+
+    // get all the notes
+
+    const getAllNotes = async () => {
+        try{
+            const response = await axiosInstance.get("/get-all-notes/");
+            if(response.data && response.data.notes){
+                setAllNotes(response.data.notes)
+            }
+        }
+        catch(error){
+            console.log("An unexpected error occurred please try again");
+        }
+    }
+
+    useEffect(() => {
+        getAllNotes();
+        getUserInfo();
+        return () => {}
+    },[])
+
     return (
         <>
-            <Navbar/>
+            <Navbar userInfo={userInfo}/>
 
             <div className="container mx-auto">
                 <div className="grid grid-cols-3 gap-4 mt-8">
-                    <NoteCard
-                    title="board meeting"
-                    date="4th june"
-                    content="marketing strategy"
-                    tags="meeting"
-                    isPinned={true}
-                    onEdit={()=>{}}
-                    onDelete={()=>{}}
-                    onPinNote={()=>{}}/>
+                    {
+                        allNotes.map((item) => (
+                            <NoteCard key={item._id}
+                            title={item.title}
+                            date={moment(item.createdOn).format('Do MMM YYYY')}
+                            content={item.content}
+                            tags={item.tags}
+                            isPinned={item.isPinned}
+                            onEdit={()=>{}}
+                            onDelete={()=>{}}
+                            onPinNote={()=>{}}/>
+
+                        ))
+                    }
 
                 </div>
             </div>
@@ -56,7 +108,8 @@ const Home = () => {
             type={openAddEditModal.type}
             noteData={openAddEditModal.data} onclose={() => {
                 setOpenAddEditModal({ isShown: false, type: "add", data: null})
-            }}/>
+            }}
+            getAllNotes={getAllNotes}/>
             </Modal>
         </>
     )

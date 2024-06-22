@@ -4,7 +4,7 @@ import SearchBar from "./search/SearchBar";
 import { useState } from "react";
 
 
-const Navbar = () => {
+const Navbar = ({userInfo}) => {
     const [searchQuery, setSearchQuery] = useState("");
     const navigate = useNavigate;
 
@@ -33,7 +33,7 @@ const Navbar = () => {
             handleSearch={handleSearch}
             onClearSearch={onClearSearch}/>
 
-            <ProfileInfo onLogOut={onLogOut}/>
+            <ProfileInfo userInfo={userInfo} onLogOut={onLogOut}/>
         </div>
     )
 }

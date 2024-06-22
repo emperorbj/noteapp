@@ -1,8 +1,9 @@
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import Navbar from "../../components/Navbar"
 import { useState } from "react"
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa6"
 import { validateEmail } from "../../utils/helper"
+import axiosInstance from "../../utils/axioInstances"
 
 
 const Login = () => {
@@ -15,7 +16,9 @@ const Login = () => {
         setIsShowPassword(!isShowPassword)
     }
 
-    const handleSubmit = (e) => {
+    const navigate = useNavigate()
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
         // Handle form submission logic here
         if(!validateEmail(email)){
@@ -29,6 +32,32 @@ const Login = () => {
         }
 
         setError(" ")
+
+
+        // login API Call
+
+        try{
+            // handle login
+            const response = await axiosInstance.post("/login",{
+                email: email,
+                password: password,
+            });
+            // handle successful login
+            if(response.data && response.data.accessToken){
+                localStorage.setItem("token",response.data.accessToken);
+                navigate("/dashboard")
+            }
+        }
+
+        catch(error){
+            // handle error
+            if(error.response && error.response.data.message) {
+                setError(error.response.data.message);
+            }
+            else{
+                setError("An unexpected error occurred. Please try again")
+            }
+        }
     };
 
     
