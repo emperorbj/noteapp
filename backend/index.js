@@ -119,10 +119,30 @@ app.post("/login", async (req, res) => {
 
 })
 
+
+// get user
+app.get("/get-user", authenticateToken, async(req,res) => {
+    const { user } = req.user;
+    const isUser = await User.findOne({_id: user._id});
+
+    if(!isUser){
+        return res.sendStatus(401)
+    }
+
+    return res.json({
+        user: {fullName: isUser.fullName,
+                email: isUser.email,
+            _id: isUser._id,
+            createdOn: isUser.createdOn},
+        message: ""
+    })
+})
+
 // Add note
 app.post("/add-note", authenticateToken, async (req,res) =>{
     const {title, content, tags} = req.body;
     const { user } = req.user;
+    //const { _id: userId } = req.user;
 
     if(!title) {
         return res.status(400).json({ error: true, message: "Title is required"})
@@ -138,7 +158,7 @@ app.post("/add-note", authenticateToken, async (req,res) =>{
             title,
             content,
             tags: tags || [],
-            user: user._id
+            userId: user._id
         });
 
 
@@ -161,21 +181,13 @@ app.post("/add-note", authenticateToken, async (req,res) =>{
 })
 
 // Edit notes
-app.put("/edit-note/noteId", authenticateToken, async (req,res) =>{
+app.put("/edit-note/:noteId", authenticateToken, async (req,res) =>{
     const noteId = req.params.noteId
-    const {title, content, tags} = req.body;
+    const {title, content, tags, isPinned} = req.body;
     const { user } = req.user;
 
-    if(!title) {
-        return res.status(400).json({ error: true, message: "No changes provided"})
-    }
-
-    if(!tags) {
-        return res.status(400).json({ error: true, message: "No changes provided"})
-    }
-
-    if(!content) {
-        return res.status(400).json({ error: true, message: "No changes provided"})
+    if (!title && !content && !tags) {
+        return res.status(400).json({ error: true, message: "No changes provided" });
     }
 
     try{
@@ -217,7 +229,7 @@ app.put("/get-all-notes/", authenticateToken, async (req,res) =>{
     const { user } = req.user;
 
     try{
-        const notes = await Note.find({userId: user_id}).sort({ isPinned: - 1 })
+        const notes = await Note.find({userId: user._id}).sort({ isPinned: - 1 })
 
         //await notes.save();
 
@@ -241,7 +253,7 @@ app.put("/get-all-notes/", authenticateToken, async (req,res) =>{
 
 
 // delete a note
-app.delete("/edit-note/noteId", authenticateToken, async (req,res) =>{
+app.delete("/delete-note/:noteId", authenticateToken, async (req,res) =>{
     const noteId = req.params.noteId
     const { user } = req.user;
 
