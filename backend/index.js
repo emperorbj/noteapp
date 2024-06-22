@@ -76,6 +76,10 @@ app.post("/account", async (req, res) => {
     
 });
 
+    // BACKEND API END POINTS
+
+
+
 // login into account end point
 app.post("/login", async (req, res) => {
     const { email, password } = req.body;
